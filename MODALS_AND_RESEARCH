@@ -2,7 +2,7 @@ We found instructions for building a steering/ race car robot and built it so th
 
 There is a medium motor at the front which changes the direction of the 2 front wheels from left to right, hence changing the direction the robot was moving and steering the robot. However, it uses parallel steering. This means that the 2 front wheels were parallel to each other. This is not ideal as when turning, the inner and outer wheels have to move at different angles as they have to cover different distances. Hence, the wheels will slip. 
 
-The 2 back wheels are controlled by 2 different motors, which allows the wheels to turn at different speeds. This is important because when turning, the wheels have to move at different speeds as the outer wheel is further from the point the robot is turning about, so circumference is larger and the outer wheel has to cover a larger distance. 
+The 2 back wheels are controlled by 2 different motors, which allow the wheels to turn at different speeds. This is important because when turning, the wheels have to move at different speeds as the outer wheel is further from the point the robot is turning about, so circumference is larger and the outer wheel has to cover a larger distance. 
 
 Another disadvantage of this design is the large distance between the front wheels and the back wheels, also known as the wheelbase. A smaller wheelbase would have been better as it would allow the robot to make sharper turns. 
 
