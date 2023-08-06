@@ -1,8 +1,10 @@
-#!/usr/bin/env python
-#
-#
 from __future__ import print_function
 import _rpi_vl53l0x as vl
+from buildhat import Motor
+
+
+frontmotor = Motor('A')
+backmotor = Motor('B')
 
 VERSION_REQUIRED_MAJOR = 1
 VERSION_REQUIRED_MINOR = 0
@@ -182,8 +184,12 @@ def main():
     '''
 
     st = vl53.wait_ready()
-    if st:
-        print("Distance = {} mm".format(vl53.get_distance()))
+
+    while st:
+        #print("Distance = {} mm".format(vl53.get_distance())
+        k_p = 0.5
+        target_dist = 300
+        run_angle = target
 
 
 while True:
