@@ -3,8 +3,8 @@ import _rpi_vl53l0x as vl
 from buildhat import Motor
 
 
-frontmotor = Motor('A')
-backmotor = Motor('B')
+frontwheel = Motor('B')
+backwheel = Motor('A')
 
 VERSION_REQUIRED_MAJOR = 1
 VERSION_REQUIRED_MINOR = 0
@@ -184,12 +184,29 @@ def main():
     '''
 
     st = vl53.wait_ready()
-
     while st:
-        #print("Distance = {} mm".format(vl53.get_distance())
-        k_p = 0.5
-        target_dist = 300
-        run_angle = target
+        #print("Distance = {} mm".format(vl53.get_distance()))
+        target_dist = 280  
+        k_p = -0.4  # Proportional control constant
+        dist = vl53.get_distance()
+        backwheel.start(speed=-40)
+        distance = vl53.get_distance()
+        error = target_dist - dist
+        steer_angle = k_p * error
+   
+        if steer_angle > 35:
+            steer_angle = 35
+        elif steer_angle < -32:
+            steer_angle = -32
+
+        frontwheel.run_to_position(steer_angle, speed = 50)
+        print(steer_angle)
+
+
+
+
+while True:
+    main()
 
 
 while True:
