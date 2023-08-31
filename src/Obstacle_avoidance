@@ -1,0 +1,103 @@
+import cv2
+import numpy as np
+
+cap = cv2.VideoCapture(0)
+
+def red(frame):
+    hsv_frame = cv2.cvtColor(frame, cv2.COLOR_BGR2HSV)
+    low_red = np.array([0, 99, 122])
+    high_red = np.array([73, 255, 255])
+    red_mask = cv2.inRange(hsv_frame, low_red, high_red)
+    contours, _ = cv2.findContours(red_mask, cv2.RETR_TREE, cv2.CHAIN_APPROX_SIMPLE)
+    contours = sorted(contours, key=lambda x:cv2.contourArea(x), reverse=True)
+
+    for cnt in contours:
+        (x, y, w, h) = cv2.boundingRect(cnt)
+        cv2.rectangle(frame, (x, y), (x + w, y + h), (0, 0, 255), 2)
+        return y - h  # y=y-coordinate of top edge, h = height of red
+
+    return -1  # Return -1 if no red object is found
+
+def green(frame):
+    hsv_frame = cv2.cvtColor(frame, cv2.COLOR_BGR2HSV)
+    low_green = np.array([59, 233, 41])
+    high_green = np.array([92, 255, 255])
+    green_mask = cv2.inRange(hsv_frame, low_green, high_green)
+    contours, _ = cv2.findContours(green_mask, cv2.RETR_TREE, cv2.CHAIN_APPROX_SIMPLE)
+    contours = sorted(contours, key=lambda x:cv2.contourArea(x), reverse=True)
+
+    for cnt in contours:
+        (x, y, w, h) = cv2.boundingRect(cnt)
+        cv2.rectangle(frame, (x, y), (x + w, y + h), (0, 255, 0), 2)
+        return y - h  # Return the y-coordinate of the bottom edge of the green object
+
+    return -1  # Return -1 if no green object is found
+
+while True:
+    ret, frame = cap.read()
+    red_bottom = red(frame)
+    green_bottom = green(frame)
+
+    if red_bottom != -1 and green_bottom != -1: #new learning point: !=, checks if two values are not equal :D
+        if red_bottom < green_bottom:
+            cv2.putText(frame, "Red object is closer", (10, 30), cv2.FONT_HERSHEY_SIMPLEX, 1, (0, 0, 255), 2)
+        else:
+            cv2.putText(frame, "Green object is closer", (10, 30), cv2.FONT_HERSHEY_SIMPLEX, 1, (0, 255, 0), 2)
+
+    cv2.imshow("frame", frame)
+   
+    if cv2.waitKey(1) & 0xFF == ord('q'):
+        break
+
+cap.release()
+cv2.destroyAllWindows()
+
+
+'''
+cap = cv2.VideoCapture(0)
+
+
+def red(frame):
+    hsv_frame = cv2.cvtColor(frame, cv2.COLOR_BGR2HSV)
+    #red colour
+    low_red = np.array([0, 196, 85])
+    high_red = np.array([179, 255, 255])
+    red_mask = cv2.inRange(hsv_frame, low_red, high_red)
+    contours, _ = cv2.findContours(red_mask, cv2.RETR_TREE, cv2.CHAIN_APPROX_SIMPLE)
+    contours = sorted(contours, key=lambda x:cv2.contourArea(x), reverse=True)
+   
+    for cnt in contours:
+        (rx, ry, rw, rh) = cv2.boundingRect(cnt)
+        cv2.rectangle(frame, (rx, ry), (rx + rw, ry + rh), (0, 0, 255), 2) # this sets the colour of the square
+        #return y+h #y coordinates of height, from bottom of the screen
+        #print("ry + rh", ry+rh)
+
+    cv2.imshow("frame", frame)
+    cv2.imshow("", red_mask)
+
+def green(frame):
+    hsv_frame = cv2.cvtColor(frame, cv2.COLOR_BGR2HSV)
+    #green colour
+    low_green = np.array([59, 233, 41])
+    high_green = np.array([92, 255, 255])
+    green_mask = cv2.inRange(hsv_frame, low_green, high_green)
+    contours, _ = cv2.findContours(green_mask, cv2.RETR_TREE, cv2.CHAIN_APPROX_SIMPLE)
+    contours = sorted(contours, key=lambda x:cv2.contourArea(x), reverse=True)
+   
+    for cnt in contours:
+        (gx, gy, gw, gh) = cv2.boundingRect(cnt)
+        cv2.rectangle(frame, (gx, gy), (gx + gw, gy + gh), (0, 255, 0), 2) # this sets the colour of the square
+        #return("gy+gh", gy+gh) # Return the y-coordinate of the bottom edge of the green
+        break
+
+    cv2.imshow("frame", frame)
+    cv2.imshow("", green_mask)
+
+
+
+while True:
+    ret, frame = cap.read()
+    red(frame)
+    green(frame)
+    if cv2.waitKey(1) & 0xFF == ord('q'):
+        break
