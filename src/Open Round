@@ -1,10 +1,32 @@
 from __future__ import print_function
 import _rpi_vl53l0x as vl
+import time
+import board
+import adafruit_tca9548a
 from buildhat import Motor
 
-
+#create I2C bus
+i2c = board.I2C() #uses board.SCL and board.SDA
+#create the TCA9548A object and give it the I2C bus
+tca = adafruit_tca9548a.TCA9548A(i2c)
 frontwheel = Motor('B')
 backwheel = Motor('A')
+#target distance for left is 535
+#target distance for right is
+#righttof = 1
+#lefttof = 3
+#fronttof = 2
+for channel in range(8):
+    if tca[channel].try_lock():
+        print("Channel {}:".format(channel), end="")
+        addresses = tca[channel].scan()
+        print([hex(address) for address in addresses if address != 0x70])
+        tca[channel].unlock()
+
+
+
+
+
 
 VERSION_REQUIRED_MAJOR = 1
 VERSION_REQUIRED_MINOR = 0
@@ -167,47 +189,126 @@ class VL53L0X(object):
         self._err = st
         return dis
 
-def main():
-    print("VL53L0X Ranging example")
 
-    vl53 = VL53L0X()
-    vl53.begin()
 
-    '''
-    version = vl53.get_devver()
-    print("VL53L0X_GetDeviceInfo:")
-    print("Device Type   : %s" % version["type"])
-    print("Device Name   : %s" % version["name"])
-    print("Device ID     : %s" % version["id"])
-    print("RevisionMajor : %d" % version["major"])
-    print("RevisionMinor : %d" % version["minor"])
-    '''
+if tca[3].try_lock():
+    lefttof = VL53L0X(address = 0x29, bus = 0x1)
+    lefttof.begin()
+    lefttof.wait_ready()
+    tca[3].unlock()
 
-    st = vl53.wait_ready()
-    while st:
-        #print("Distance = {} mm".format(vl53.get_distance()))
-        target_dist = 280  
-        k_p = -0.4  # Proportional control constant
-        dist = vl53.get_distance()
-        backwheel.start(speed=-40)
-        distance = vl53.get_distance()
-        error = target_dist - dist
-        steer_angle = k_p * error
+else:
+    print("left failed")
    
-        if steer_angle > 35:
-            steer_angle = 35
-        elif steer_angle < -32:
-            steer_angle = -32
 
-        frontwheel.run_to_position(steer_angle, speed = 50)
-        print(steer_angle)
+if tca[1].try_lock():
+    righttof = VL53L0X(address = 0x29, bus = 0x1)
+    righttof.begin()
+    righttof.wait_ready()
+    tca[1].unlock()
 
+else:
+    print("right failed")
+'''
+
+if tca[3].try_lock():
+    righttof = VL53L0X(address =0x29, bus = 0x1)
+    righttof.begin()
+    st = righttof.wait_ready()
+   
+    while st:
+        print("Distance {}mm".format(righttof.get_distance()))
+
+    tca[3].unlock()
+else:
+    print("right failed")
+'''
+
+def init():
+    global tca, lefttof, righttof
+    print("VL53L0X Ranging")
+   
+
+#select channel for left tof
+    if tca[2].try_lock():
+        print(type(lefttof))
+        leftdist = lefttof.get_distance()
+        leftst = lefttof.wait_ready() #checks if left tof is ready status
+        if leftst:
+            print("lefttDistance",leftdist)
+            if leftdist > 800:
+                rightpid()
+        tca[2].unlock()
+     
+
+    if tca[3].try_lock():
+        print(type(righttof))
+        rightdist = righttof.get_distance()
+        rightst = righttof.wait_ready()
+        if rightst:            
+            print("rightDistance",rightdist)
+            if rightdist > 800:
+                leftpid()
+        tca[3].unlock()
+
+
+    else:
+        print("range failed")
+
+def rightpid():
+    global righttof, tca
+    if tca[1].try_lock():
+        righttof.begin()
+        frontwheel.run_to_position(0)
+        backwheel.start(speed=-30)
+        rightdist = righttof.get_distance()
+        rightst = righttof.wait_ready() #checks if left tof is ready status
+        if rightst:
+            print("righttDistance",rightdist)
+           
+            right_target_dist = 535
+            right_kp = 0.4  # Proportional control constant
+            righterror = right_target_dist - rightdist
+            rightsteer_angle = right_kp * righterror
+
+            if rightsteer_angle > 35:
+                rightsteer_angle = 35
+            elif rightsteer_angle < -32:
+                rightsteer_angle = -32
+
+            frontwheel.run_to_position(rightsteer_angle, speed = 20)
+            print(rightsteer_angle)
+               
+    tca[1].unlock()
+
+def leftpid():
+    global lefttof, tca
+    if tca[3].try_lock():
+        lefttof.begin()
+        frontwheel.run_to_position(0)
+        backwheel.start(speed=-30)
+        leftdist = lefttof.get_distance()
+        leftst = lefttof.wait_ready() #checks if left tof is ready status
+        if leftst:
+            print("lefttDistance",leftdist)
+           
+            left_target_dist = 535
+            left_kp = -0.5  # Proportional control constant
+            lefterror = left_target_dist - leftdist
+            leftsteer_angle = left_kp * lefterror
+
+            if leftsteer_angle > 35:
+                leftsteer_angle = 35
+            elif leftsteer_angle < -32:
+                leftsteer_angle = -32
+
+            frontwheel.run_to_position(leftsteer_angle, speed = 20)
+            print(leftsteer_angle)
+               
+    tca[3].unlock()
 
 
 
 while True:
-    main()
+    rightpid()
 
-
-while True:
-    main()
