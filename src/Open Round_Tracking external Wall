@@ -209,6 +209,16 @@ if tca[1].try_lock():
 
 else:
     print("right failed")
+   
+
+if tca[2].try_lock():
+    fronttof = VL53L0X(address = 0x29, bus = 0x1)
+    fronttof.begin()
+    fronttof.wait_ready()
+    tca[2].unlock()
+
+else:
+    print("front failed")
 '''
 
 if tca[3].try_lock():
@@ -256,30 +266,50 @@ def init():
         print("range failed")
 
 def rightpid():
-    global righttof, tca
-    if tca[1].try_lock():
-        righttof.begin()
-        frontwheel.run_to_position(0)
-        backwheel.start(speed=-30)
-        rightdist = righttof.get_distance()
-        rightst = righttof.wait_ready() #checks if left tof is ready status
-        if rightst:
-            print("righttDistance",rightdist)
-           
-            right_target_dist = 535
-            right_kp = 0.4  # Proportional control constant
-            righterror = right_target_dist - rightdist
-            rightsteer_angle = right_kp * righterror
+    global righttof, fronttof, tca
+    while True:
+        if tca[1].try_lock():
+            righttof.begin()
+            frontwheel.run_to_position(0)
+            backwheel.start(speed=-30)
+            rightdist = righttof.get_distance()
+            rightst = righttof.wait_ready() #checks if right tof is ready status
+            if rightst:
+                    print("righttDistance",rightdist)
+                   
+                    right_target_dist = 535
+                    right_kp = 0.4  # Proportional control constant
+                    righterror = right_target_dist - rightdist
+                    rightsteer_angle = right_kp * righterror
 
-            if rightsteer_angle > 35:
-                rightsteer_angle = 35
-            elif rightsteer_angle < -32:
-                rightsteer_angle = -32
+                    if rightsteer_angle > 35:
+                        rightsteer_angle = 35
+                    elif rightsteer_angle < -32:
+                        rightsteer_angle = -32
 
-            frontwheel.run_to_position(rightsteer_angle, speed = 20)
-            print(rightsteer_angle)
+                    frontwheel.run_to_position(rightsteer_angle, speed = 20)
+                    print(rightsteer_angle)
+        tca[1].unlock()
                
-    tca[1].unlock()
+        if tca[2].try_lock():
+            fronttof.begin()
+            frontdist = fronttof.get_distance()
+            frontst = fronttof.wait_ready()
+            if frontst:
+                if frontdist < 500:
+                    print(frontdist, "no")
+   
+        tca[2].unlock()
+   
+    if tca[2].try_lock():
+        fronttof.begin()
+        frontdist = fronttof.get_distance()
+        frontst = fronttof.wait_ready()
+        if frontdist < 500:
+            frontwheel.run_to_position(0)
+            backwheel.start()
+    tca[2].unlock()
+
 
 def leftpid():
     global lefttof, tca
@@ -311,4 +341,11 @@ def leftpid():
 
 while True:
     rightpid()
+
+
+
+
+
+
+       
 
