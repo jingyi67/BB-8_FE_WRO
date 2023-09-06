@@ -24,3 +24,7 @@ _Remove this section before the first commit to the repository_
 1. Clone this repo by using the `git clone` functionality.
 2. Remove `.git` directory
 3. [Initialize a new public repository on GitHub](https://github.com/new) by following instructions from "create a new repository on the command line" section (appeared after pressing "Create repository" button).
+
+
+For the open challenge round, we used VL53L0X Time of Flight (ToF) distance sensors to sense the inner walls. There is 1 ToF sensor on each side of the robot, hence allowing the robot to sense the inner walls regardless of which direction it is moving and which side of the robot the inner wall is on. The ToF senses the distance from the walls. When the ToF senses a large distance, meaning that the inner wall is no longer in the range of the ToF, the robot would turn in the corresponding direction, hence going along the inner wall. 
+For the obstacle challenge round, we used a camera. The camera would sense the traffic signs, hence allowing the robot to know which direction it should be turning in. 
