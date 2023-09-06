@@ -17,14 +17,5 @@ This repository contains engineering materials of a self-driven vehicle's model 
 
 _This part must be filled by participants with the technical clarifications about the code: which modules the code consists of, how they are related to the electromechanical components of the vehicle, and what is the process to build/compile/upload the code to the vehicle’s controllers._
 
-## How to prepare the repo based on the template
-
-_Remove this section before the first commit to the repository_
-
-1. Clone this repo by using the `git clone` functionality.
-2. Remove `.git` directory
-3. [Initialize a new public repository on GitHub](https://github.com/new) by following instructions from "create a new repository on the command line" section (appeared after pressing "Create repository" button).
-
-
-For the open challenge round, we used VL53L0X Time of Flight (ToF) distance sensors to sense the inner walls. There is 1 ToF sensor on each side of the robot, hence allowing the robot to sense the inner walls regardless of which direction it is moving and which side of the robot the inner wall is on. The ToF senses the distance from the walls. When the ToF senses a large distance, meaning that the inner wall is no longer in the range of the ToF, the robot would turn in the corresponding direction, hence going along the inner wall. 
-For the obstacle challenge round, we used a camera. The camera would sense the traffic signs, hence allowing the robot to know which direction it should be turning in. 
+For the open challenge round, we used VL53L0X Time of Flight (ToF) distance sensors to sense the inner walls. There is 1 ToF sensor on each side of the robot, hence allowing the robot to sense the inner walls regardless of which direction it is moving and which side of the robot the inner wall is on. The ToF senses the distance from the walls. When the ToF senses a large distance, meaning that the inner wall is no longer in the range of the ToF, the robot would turn in the corresponding direction, hence going along the inner wall. Since the ToF also senses the distance the robot is from the inner wall, the robot would be able to turn away from the inner wall if it is too close and turn away from the inner wall if it is too far. Hence, it would not crash into the inner wall, or be too far from the inner wall that it hits the outer walls. 
+For the obstacle challenge round, we used a camera. The camera would sense the traffic signs (green or red), hence allowing the robot to know which direction it should be turning in (if it senses green, it turns left and if it senses red, it turns right).
